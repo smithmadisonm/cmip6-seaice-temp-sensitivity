@@ -81,10 +81,10 @@ def AverageArctic_airtemperature(TAS_IN,MEMBER_IN):
     return ts_tas_ArcticAve
 
 def Arctic_SIextent(SICONC_IN,CELLAREA_IN,MEMBER_IN):
-    SICONC_IN=SICONC_IN.isel(i=slice(int(len(SICONC_IN.i)/2),
-                                                               len(SICONC_IN.i)))
+    #Find index for NH
+    NH_ind = int(SICONC_IN['j'].shape[0]/2)
     #cell areas only where SI concentration greater than 15% - must be same shape/format!
-    cellarea_extent = CELLAREA_IN[MEMBER_IN,:,:].where(SICONC_IN[MEMBER_IN,:,:,:]>.15)
+    cellarea_extent = CELLAREA_IN[MEMBER_IN,NH_ind:,:].where(SICONC_IN[MEMBER_IN,:,NH_ind:,:]>15)
     #sum area where SI conc > 15%
     ts_Arctic_extent = cellarea_extent.sum(dim=['i','j'])
     return ts_Arctic_extent
