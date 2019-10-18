@@ -21,8 +21,6 @@ def rename_dimensions(DICT_IN, DICT_OUT):
     """
     if 'x' in DICT_IN.dims:
         DICT_OUT = DICT_IN.rename(dict(x='j',y='i'))
-    elif 'nlat' in DICT_IN.dims:
-        DICT_OUT = DICT_IN.rename(dict(x='j',y='i'))
     else: 
         DICT_OUT = DICT_IN
     return DICT_OUT
