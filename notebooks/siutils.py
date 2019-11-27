@@ -9,6 +9,7 @@ import xarray as xr
 import intake
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import stats
 
 def rename_dimensions(DICT_IN, DICT_OUT):
     """Renames the dimensions of DICT_IN from whatever they were to 
@@ -80,14 +81,14 @@ def AverageArctic_airtemperature(TAS_IN,MEMBER_IN):
     ts_tas_ArcticAve = tas_Arctic[MEMBER_IN,:,:].mean(dim=['lat','lon'])
     return ts_tas_ArcticAve
 
-def Arctic_SIextent(SICONC_IN,CELLAREA_IN,MEMBER_IN):
-    #Find index for NH
-    NH_ind = int(SICONC_IN['j'].shape[0]/2)
-    #cell areas only where SI concentration greater than 15% - must be same shape/format!
-    cellarea_extent = CELLAREA_IN[MEMBER_IN,NH_ind:,:].where(SICONC_IN[MEMBER_IN,:,NH_ind:,:]>15)
-    #sum area where SI conc > 15%
-    ts_Arctic_extent = cellarea_extent.sum(dim=['i','j'])
-    return ts_Arctic_extent
+def Arctic_SIextent(SICONC_IN,CELLAREA_IN):
+   #Find index for NH
+   NH_ind = int(SICONC_IN['j'].shape[0]/2)
+   #cell areas only where SI concentration greater than 15% - must be same shape/format!
+   cellarea_extent = CELLAREA_IN[:,NH_ind:,:].where(SICONC_IN[:,:,NH_ind:,:]>15)
+   #sum area where SI conc > 15%
+   ts_Arctic_extent = cellarea_extent.sum(dim=['i','j'])
+   return ts_Arctic_extent
 
 def scatter_tas_SIE_linreg(TAS_ARCTIC_IN,SIE_ARCTIC_IN,MONTHS_IN,PLOTFLAG):
     import calendar
@@ -97,7 +98,7 @@ def scatter_tas_SIE_linreg(TAS_ARCTIC_IN,SIE_ARCTIC_IN,MONTHS_IN,PLOTFLAG):
         fig = plt.figure()
     for m,mi in enumerate(MONTHS_IN):
         CESM_airtemp_mi = TAS_ARCTIC_IN[mi::12].values
-        CESM_extent_mi = extent_NH[mi::12].values
+        CESM_extent_mi = SIE_ARCTIC_IN[mi::12].values
         monthname = calendar.month_name[mi+1]
 
         slope,intercept,r_value, p_value, std_err = stats.linregress(CESM_airtemp_mi,CESM_extent_mi/1e12)
