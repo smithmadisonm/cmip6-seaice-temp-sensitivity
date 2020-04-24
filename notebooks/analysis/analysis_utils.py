@@ -1,12 +1,54 @@
 """
-Does linear regression for sea ice extent and arctic temperature
+Calculates basic Arctic and sea ice relevant quantities:
+Examples: 
+Arctic means
+Totals Arctic sea ice extent
 """
-
+import numpy as np
 import calendar
 import matplotlib.pyplot as plt
 import math
 
 from scipy import stats
+
+def arctic_mean(VAR_DICT,VAR,MIN_LAT):
+    """Calculates area weighted Arctic mean: 
+        Inputs: 
+        VAR_DICT = Xarray Dataset with latitude and longitude values
+        VAR = Xarray DataArray variable with time dimension
+        MIN_LAT = Minimum latitude to include in arctic mean 
+
+        outputs: 
+        var_armn = Area weighted Arctic mean
+    """
+    ones_full = np.ones((VAR.isel(time=0,member_id=0).shape))
+    area_weight = np.cos(np.deg2rad(VAR_DICT.lat)).expand_dims('lon',axis=1)*ones_full
+
+    var_arsum = (VAR*area_weight).sel(lat=slice(MIN_LAT,90)).sum(dim=['lat','lon'])
+    var_armn = var_arsum/(area_weight.sel(lat=slice(MIN_LAT,90)).sum(dim=['lat','lon']))
+    
+    return var_armn
+
+def Arctic_SIextent(SICONC_IN,CELLAREA_IN,CUTOFF):
+    """Finds total Arctic sea ice extent
+       Inputs: 
+       SICONC_IN = 
+       CELLAREA_IN = cell area (time,lat,lon)
+       CUTOFF = Percent concentration to cutoff
+       
+       Outputs: 
+       ts_Arctic_extent = total Arctic sea ice extent
+    """
+   #Find index for NH
+   NH_ind = int(SICONC_IN['j'].shape[0]/2)
+    
+   #cell areas only where SI concentration greater than CUTOFF - must be same shape/format!
+   cellarea_extent = CELLAREA_IN[:,NH_ind:,:].where(SICONC_IN[:,:,NH_ind:,:]>CUTOFF)
+    
+   #sum area where SI conc > 15%
+   ts_Arctic_extent = cellarea_extent.sum(dim=['i','j'])
+    
+   return ts_Arctic_extent
 
 def scatter_tas_SIE_linreg(TAS_ARCTIC_IN,SIE_ARCTIC_IN,MONTHS_IN,PLOTFLAG,MODEL):
     slopes_all = []
@@ -103,16 +145,4 @@ def scatter_linreg(varx,vary,months_in,model,plotflag=False):
         
     return slopes_all, r_all, intercept_all
 
-# def plot_scatter(varx,vary,slopes,intercepts,r_value,nmonths)
-#     fig = plt.figure(figsize=(12,5))       
-#     ax = fig.add_subplot(1,len(months_in),m+1)
-#     ax.scatter(airtemp_mi,extent_mi/1e12)
-#     ax.plot(airtemp_mi, intercept + slope*airtemp_mi, 'r')
-#     ax.set_title(monthname+', slope: %f  ' % (slope))
-#     #print("slope: %f  " % (slope))
-#     ax.set_xlabel('Temp (K)')
-#     ax.set_ylabel('SIE (millions km$^2$)')
-#     fig.suptitle(model)
 
-#     if plotflag == True:
-#         plt.show()
