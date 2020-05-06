@@ -62,13 +62,39 @@ def rename_dimensions(DICT_IN, DICT_OUT):
             DICT_OUT = full dictionary with new dimension names
     """
     if 'x' in DICT_IN.dims:
-        DICT_OUT = DICT_IN.rename(dict(x='j',y='i'))
+        DICT_OUT = DICT_IN.rename_dims(dict(x='j',y='i'))
     elif 'ni' in DICT_IN.dims:
-        DICT_OUT = DICT_IN.rename(dict(nj='j',ni='i'))
+        DICT_OUT = DICT_IN.rename_dims(dict(nj='j',ni='i'))
     elif 'nlon' in DICT_IN.dims:
-        DICT_OUT = DICT_IN.rename(dict(nlat='j',nlon='i'))
+        DICT_OUT = DICT_IN.rename_dims(dict(nlat='j',nlon='i'))
     elif 'longitude' in DICT_IN.dims:
-        DICT_OUT = DICT_IN.rename(dict(latitude='j',longitude='i'))
+        DICT_OUT = DICT_IN.rename_dims(dict(latitude='j',longitude='i'))
+    elif 'lon' in DICT_IN.dims:
+        DICT_OUT = DICT_IN.rename_dims(dict(lat='j',lon='i'))
     else: 
         DICT_OUT = DICT_IN
+    return DICT_OUT
+
+def rename_lat_lon(DICT_IN, DICT_OUT):
+    """
+    Renames the dimensions of DICT_IN from whatever they were to 
+       'latitude' and 'longitude'.
+       inputs:  
+            DICT_IN = dictionary 
+            DICT_OUT = empty dictionary 
+       outputs: 
+            DICT_OUT = full dictionary with new dimension names
+    """
+    if 'latitude' in list(DICT_IN.coords):
+        DICT_OUT = DICT_IN
+    elif 'latitude' in list(DICT_IN.data_vars):
+        DICT_OUT = DICT_IN.set_coords(['latitude','longitude'])
+    elif 'lat' in list(DICT_IN.coords):
+        DICT_OUT = DICT_IN.rename({'lat':'latitude','lon':'longitude'})
+    elif 'lat' in list(DICT_IN.data_vars):
+        dict_out_temp = DICT_IN.rename({'lat':'latitude','lon':'longitude'})
+        DICT_OUT = dict_out_temp.set_coords(['latitude','longitude'])
+    else: 
+        DICT_OUT = DICT_IN
+        
     return DICT_OUT
