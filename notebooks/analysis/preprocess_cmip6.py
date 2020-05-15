@@ -11,8 +11,8 @@ import analysis_utils as au
 #collection_fname = 'dset_dict_historical.npy'
 #collection_fname = 'dset_dict_piControl.npy'
 #collection_fname = 'dset_dict_ssp370.npy'
-#collection_fname = 'dset_dict_historical_siconc_tas_extracted.npy'
-collection_fname = 'dset_dict_ssp370_siconc_tas_extracted.npy'
+#collection_fname = '../dset_dict_historical_siconc_tas_extracted.npy'
+collection_fname = '../dset_dict_ssp370_siconc_tas_extracted.npy'
 # ------------------------------------------------------------------------
 
 dset_dict = np.load(collection_fname, allow_pickle='TRUE').item()
@@ -33,9 +33,6 @@ models_intersect = dset_dict[first_dset].keys()
 #     dset_dict_temp[v] = dset_dict_mods
 # dset_dict = dset_dict_temp
 
-si_dict = dset_dict['siconc']
-tas_dict = dset_dict['tas']
-
 # for m in models_intersect:
 #     si_dict[m]['sie_tot_arc'] = Arctic_SIextent(si_dict[m]['siconc'], 
 #                                                   si_dict[m]['areacello'], 15)
@@ -44,8 +41,8 @@ warnings.filterwarnings('ignore')
 
 for m in models_intersect:
     print('Calculating indices on model '+ m)
-    if 'areacello' in si_dict[m].keys():
-        areacello = si_dict[m]['areacello'] 
+    if 'areacello' in dset_dict['siconc'].keys():
+        areacello = dset_dict['siconc']['areacello'] 
     else: 
         try:
             areacello = au.get_cellareao(m)
@@ -54,9 +51,9 @@ for m in models_intersect:
             continue    
 
 #    si_dict[m]['sie_tot_arc'] = au.Arctic_SIextent(si_dict[m]['siconc'], areacello, 15)
-    si_dict[m]['siextent'] = au.calc_siextent(si_dict[m]['siconc'],15)
-    si_dict[m]['sie_tot_arc'] = au.calc_tot_nh_siextent(si_dict[m]['siextent'],areacello,m)
-    tas_dict[m]['tas_arc_mean'] = au.calc_arctic_mean(tas_dict[m], tas_dict[m]['tas'], 70)
+    dset_dict['siconc'][m]['siextent'] = au.calc_siextent(dset_dict['siconc'][m]['siconc'],15)
+    dset_dict['siconc'][m]['sie_tot_arc'] = au.calc_tot_nh_siextent(dset_dict['siconc'][m]['siextent'],areacello,m)
+    dset_dict['tas'][m]['tas_arc_mean'] = au.calc_arctic_mean(dset_dict['tas'][m], dset_dict['tas'][m]['tas'], 70)
     
     # Calculate climatology, anomalies and stds for Arctic sea ice extent and mean Arctic temperature
     # There are some performance warnings from dask. Hopefully not an issue?
@@ -74,9 +71,7 @@ for m in models_intersect:
     dset_dict['tas'][m]['tas_arc_mean_anom'] = var2.groupby('time.month') -  dset_dict['tas'][m]['tas_arc_mean_clim'] 
     
 warnings.filterwarnings('default')
-    
-dset_dict['siconc'] = si_dict
-dset_dict['tas'] = tas_dict
+
 # ------------------------------------------------------------------------
 
 # Calculate climatology, anomalies and stds for variables matching dataset keys

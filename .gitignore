@@ -108,3 +108,6 @@ venv.bak/
 #npy files
 >>>>>>> master
 *.npy
+
+# my notebooks: 
+/Katie_analysis
