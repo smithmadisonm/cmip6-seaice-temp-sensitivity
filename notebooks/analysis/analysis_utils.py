@@ -69,7 +69,7 @@ def Arctic_SIextent(SICONC_IN,CELLAREA_IN,CUTOFF):
     return ts_Arctic_extent
 
 def calc_siextent(siconc_in,cutoff):
-    """Finds total Arctic sea ice extent
+    """Finds Arctic sea ice extent
        Inputs: 
        siconc_in = 
        cutoff = Percent concentration to cutoff (%)
@@ -96,7 +96,7 @@ def calc_tot_nh_siextent(siextent,areacello,model):
        tot_nh_siextent = total nh sea ice extent (units = km^2)
     """
     if areacello.units == 'm2':
-        areacello = areacello*10e-6
+        areacello = areacello*10**(-6)
         areacello.attrs['units']='km2' 
         
     if len(areacello.shape)>2:

@@ -12,31 +12,14 @@ import analysis_utils as au
 #collection_fname = 'dset_dict_piControl.npy'
 #collection_fname = 'dset_dict_ssp370.npy'
 #collection_fname = '../dset_dict_historical_siconc_tas_extracted.npy'
-collection_fname = '../dset_dict_ssp370_siconc_tas_extracted.npy'
+#collection_fname = '../dset_dict_ssp370_siconc_tas_extracted.npy'
+collection_fname = '../dset_dict_piControl_siconc_tas_extracted.npy'
 # ------------------------------------------------------------------------
 
 dset_dict = np.load(collection_fname, allow_pickle='TRUE').item()
 first_dset = list(dset_dict.keys())[0]
 models_intersect = dset_dict[first_dset].keys()
 
-# Change latitude and longitude to coordinates (from variables)
-# dset_dict_temp = {}
-# for v in list(dset_dict.keys()):
-#     print('working on '+v)
-#     dset_dict_mods = {}
-#     for m in models_intersect:
-#         if 'latitude' in dset_dict[v][m].data_vars:
-# #            print('changing lat/lon')
-#             dset_dict_mods[m] = dset_dict[v][m].set_coords(['longitude', 'latitude'])
-#         else: 
-#             dset_dict_mods[m] = dset_dict[v][m]
-#     dset_dict_temp[v] = dset_dict_mods
-# dset_dict = dset_dict_temp
-
-# for m in models_intersect:
-#     si_dict[m]['sie_tot_arc'] = Arctic_SIextent(si_dict[m]['siconc'], 
-#                                                   si_dict[m]['areacello'], 15)
-#     tas_dict[m]['tas_arc_mean'] = arctic_mean(tas_dict[m], tas_dict[m]['tas'], 70)
 warnings.filterwarnings('ignore')
 
 for m in models_intersect:
@@ -60,15 +43,18 @@ for m in models_intersect:
 
     # n.b. total anomalies don't add up to exactly zero for sie_tot_arc_anom
     # this is just a precision thing because xarrays are only 8 sig figs
-
+    
+    
     print('Calculating anomalies for indices')
     var1 = dset_dict['siconc'][m]['sie_tot_arc']
     dset_dict['siconc'][m]['sie_tot_arc_clim'] = var1.groupby('time.month').mean(dim='time')
-    dset_dict['siconc'][m]['sie_tot_arc_anom'] = var1.groupby('time.month') - dset_dict['siconc'][m]['sie_tot_arc_clim']
+    dset_dict['siconc'][m]['sie_tot_arc_anom'] = (var1.groupby('time.month') - 
+                                                  dset_dict['siconc'][m]['sie_tot_arc_clim'])
     
     var2 = dset_dict['tas'][m]['tas_arc_mean']
     dset_dict['tas'][m]['tas_arc_mean_clim'] = var2.groupby('time.month').mean(dim='time')
-    dset_dict['tas'][m]['tas_arc_mean_anom'] = var2.groupby('time.month') -  dset_dict['tas'][m]['tas_arc_mean_clim'] 
+    dset_dict['tas'][m]['tas_arc_mean_anom'] = (var2.groupby('time.month') -  
+                                                dset_dict['tas'][m]['tas_arc_mean_clim'])
     
 warnings.filterwarnings('default')
 

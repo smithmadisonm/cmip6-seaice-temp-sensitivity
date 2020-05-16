@@ -20,7 +20,8 @@ def get_cmip6_catalogue():
     Get full catalogue of CMIP6 data on glade or cloud
     """
     if is_ncar_host():
-        cmip6_collection = intake.open_esm_datastore("../../catalogs/glade-cmip6.json")
+        cat_dir = "/glade/collections/cmip/catalog/intake-esm-datastore/catalogs/"
+        cmip6_collection = intake.open_esm_datastore(cat_dir + "glade-cmip6.json")
     else:
         cmip6_collection = intake.open_esm_datastore("../../catalogs/pangeo-cmip6.json")
     
